@@ -1,7 +1,7 @@
 # from models import Config
 import os
 
-bdname = 'cheapvpn_db'
+bdname = 'master_bot_kit_db'
 bduser = 'postgres'
 bdpassword = 'nef441'
 bdhost = '51.79.69.179'
