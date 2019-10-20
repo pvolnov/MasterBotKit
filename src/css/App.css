@@ -1,0 +1,15 @@
+.Page {
+  margin-top: 3%;
+}
+
+.baseelem{
+  height: 100%;
+  width: 100px;
+  background-color: aqua;
+}
+.box{
+  width: 100%;
+  height: 100px;
+  background-color: aliceblue;
+}
+
