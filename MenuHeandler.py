@@ -8,11 +8,11 @@ from models import Menu, db
 class MenuHeandler(HTTPMethodView):
 
     def get(self, request):
-        print(request.args)
         args = request.args
         if "menu_id" in args:
-            menu=Menu.get_by_id(args["menu_id"])
-            return response.json(menu)
+            menu=Menu.get_by_id(args["menu_id"][0])
+            res=model_to_dict(menu)
+            return response.json(res)
 
         menu = Menu.select().execute()
         menues = []
@@ -21,10 +21,11 @@ class MenuHeandler(HTTPMethodView):
         return response.json(menues)
 
     def post(self, request):
-        print(request.json)
+        r=request.json
+        print("add menu",r)
         try:
-            Menu.insert(request.json).execute()
-            return response.text("ok")
+            m=Menu.insert(r).execute()
+            return response.text({"id":m})
         except Exception as e:
             db.rollback()
             return response.json(
@@ -34,15 +35,25 @@ class MenuHeandler(HTTPMethodView):
 
     def patch(self, request):
         r=request.json
-        args = request.args
-        if "menu_id" in args:
-            r["id"]=args["menu_id"]
-        Menu.update(r).execute()
+        if "btn_coord" in r:
+            menu=Menu.get_by_id(r["menu_id"])
+            menu.buttons[r["btn_coord"]["x"]][r["btn_coord"]["y"]]=r["button_id"]
+            menu.save()
+            return response.json("ok")
+
+        if "zbutton" in r:
+            Menu.update({Menu.zbutton: r["zbutton"],Menu.name:r["name"]}).where(Menu.id == r["id"]).execute()
+            return response.json("ok")
+
+        Menu.update({Menu.buttons:r["buttons"]}).where(Menu.id==r["id"]).execute()
         return response.text("ok")
 
     def delete(self, request):
-        r = request.json
-        if r["menu_id"] < 2:
+        r = request.args
+        if int(r["menu_id"][0]) < 2:
             return response.text("You can`t delete START menu")
-        Menu.delete_by_id(r["menu_id"])
+        Menu.delete_by_id(r["menu_id"][0])
         return response.text("Complete")
+
+    def options(self,reques):
+        return response.text("")

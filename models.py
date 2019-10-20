@@ -4,7 +4,7 @@ from playhouse.postgres_ext import PostgresqlExtDatabase, JSONField, ArrayField
 
 db = PostgresqlExtDatabase(bdname, user=bduser, password=bdpassword,
                            host=bdhost, port=bdport)
-
+# db.rollback()
 
 class Users(Model):
     tel_id = IntegerField(index=True)
@@ -22,7 +22,26 @@ class Buttons(Model):
     name = TextField(null=True,unique=True)
     callback = TextField(null=True)
     type = IntegerField(default=0)
-    info = JSONField(default=[])
+    info = JSONField(default={
+        "callback": "",
+        "changePermit": False,
+        "newLevel": 0,
+        "saveInTable": False,
+        "levelPermit": False,
+        "constLevel": False,
+        "tableName": 0,
+        "newGroupId": 1,
+        "columnName": 0,
+        "tableRowValue": "",
+        "editRow": False,
+        "notification": False,
+        "notificationText": "",
+        "changeGroup": False,
+        "response": "",
+        "funkParams": "",
+        "template": "new",
+        "textParsing": "no",
+    })
 
     class Meta:
         database = db
@@ -33,7 +52,7 @@ class Menu(Model):
     name = TextField(null=True,unique=True)
     type = IntegerField(default=0)
     zbutton = JSONField(default={})
-    buttons = JSONField(default={})
+    buttons = JSONField(default=[])
 
     class Meta:
         database = db
@@ -68,11 +87,16 @@ class Config(Model):
         database = db
         db_table = 'Config'
 
-# Order.drop_table()
-# Options.drop_table()
-# Items.drop_table()
-# Users.drop_table()
+
+
 # Config.drop_table()
+# Rows.drop_table()
+# Tables.drop_table()
+# Buttons.drop_table()
+# Menu.drop_table()
+# Users.drop_table()
+
+
 
 Users.create_table()
 Buttons.create_table()

@@ -2,7 +2,9 @@ from sanic import Sanic
 from sanic.views import HTTPMethodView
 from sanic.response import text
 
+from Api import Api
 from ButtonHeandler import ButtonHeandler
+from ConfigHeandler import ConfigHeandler
 from MenuHeandler import MenuHeandler
 from TableHeandler import TableHeandler
 
@@ -14,7 +16,8 @@ app = Sanic('some_name')
 @app.middleware('response')
 async def print_on_response(request, response):
     response.headers['Access-Control-Allow-Origin'] = '*'
-    print("I print when a response is returned by the server")
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers["Access-Control-Allow-Methods"] = "POST, PUT, GET, OPTIONS, DELETE, PATCH"
 
 
 
@@ -31,10 +34,12 @@ class SimpleAsyncView(HTTPMethodView):
 
 
 app.add_route(MenuHeandler.as_view(), '/menus')
-app.add_route(ButtonHeandler.as_view(), '/buttons/<btn_id:int>')
+# app.add_route(ButtonHeandler.as_view(), '/buttons/<btn_id:int>')
 app.add_route(ButtonHeandler.as_view(), '/buttons')
 app.add_route(TableHeandler.as_view(), '/tables')
+app.add_route(ConfigHeandler.as_view(), '/config')
+app.add_route(Api.as_view(), '/api')
 
 if __name__ == '__main__':
     # app.run(host="0.0.0.0", port=8000, debug=True)
-    app.run(host="localhost", port=8000, debug=True)
+    app.run(host="localhost", port=8000, debug=False)

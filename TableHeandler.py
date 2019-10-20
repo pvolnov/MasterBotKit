@@ -14,18 +14,18 @@ class TableHeandler(HTTPMethodView):
             t=Tables.get_by_id(r["table_id"])
 
             columns_names=[c["name"] for c in t.columns]
-            print(columns_names)
-            all=Rows.select(Rows.id,Rows.columns).where(Rows.table==t).execute()
-            for a in all:
-                print(a.columns)
+            all_rows=Rows.select(Rows.id,Rows.columns).where(Rows.table==t).execute()
+            for row in all_rows:
                 res=[]
+                print("columns_names",columns_names)
+                print("row.columns",row.columns)
                 for c_name in columns_names:
-                    if c_name in a.columns:
-                        res.append(a.columns[c_name])
+                    if c_name in row.columns:
+                        res.append(row.columns[c_name])
                     else:
                         res.append("-")
 
-                result.append(res)
+                result.append({"row":res,"id":row.id})
         else:
             all = Tables.select().execute()
             for a in all:
@@ -34,7 +34,6 @@ class TableHeandler(HTTPMethodView):
 
 
     def post(self, request):
-        print(request.json)
         try:
             Tables.insert(request.json).execute()
             return response.text("ok")
@@ -46,10 +45,36 @@ class TableHeandler(HTTPMethodView):
 
     def patch(self, request):
         r=request.json
-        Tables.update(r).execute()
+        if "patch_table_data" in r:
+            for rid in r["patch_table_data"]:
+                row=Rows.get_by_id(rid)
+                row.columns={
+                    **row.columns,
+                    **r["patch_table_data"][rid]
+                }
+                row.save()
+            return response.text("ok")
+
+        Tables.update({Tables.columns:r["columns"]}).where(Tables.id==r["id"]).execute()
         return response.text("ok")
 
+    def post(self, request):
+        r=request.json
+        t=Tables.insert(r).execute()
+        r["id"]=t
+        return response.json(r)
+
     def delete(self, request):
-        r = request.json
-        Buttons.delete_by_id(r["table_id"])
-        return response.text("Complete")
+        r = request.args
+        if "table_id" in r:
+            Tables.delete_by_id(r["table_id"][0])
+        if "rows[]" in r:
+            for r in r["rows[]"]:
+                try:
+                    Rows.delete_by_id(r)
+                except:
+                    response.text("Error")
+        return response.text("ok")
+
+    def options(self,reques):
+        return response.text("")

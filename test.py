@@ -1,3 +1,5 @@
-from models import Menu
+from models import Buttons, Rows, Users, Tables
 
-Menu.update({'id': 1, 'name': 'start'}).execute()
+u=Users.get_by_id(1)
+t=Tables.get_by_id(1)
+Rows.create(user=u,table=t,columns={"Name2":"petya","Name":"pat"})
