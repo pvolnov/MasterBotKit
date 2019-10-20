@@ -84,8 +84,9 @@ class ButtonHeandler(HTTPMethodView):
         return response.text("ok")
 
     def delete(self, request):
-        r = request.json
-        Buttons.delete_by_id(r["id"])
+        r = request.args
+        if "button_id" in r:
+            Buttons.delete_by_id(r["button_id"][0])
         return response.text("Complete")
 
     def options(self, request):
