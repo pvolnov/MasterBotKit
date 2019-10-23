@@ -1,5 +1,20 @@
-from models import Buttons, Rows, Users, Tables
+import requests
 
-u=Users.get_by_id(1)
-t=Tables.get_by_id(1)
-Rows.create(user=u,table=t,columns={"Name2":"petya","Name":"pat"})
+with open("upload.bat", 'rb') as f:
+    r = requests.post("http://localhost:8000/upload", data={
+        "reqtype": "fileupload"
+    },
+                      files={
+                          "file": f
+                      })
+    print(r.text)
+
+# with open("upload.bat", 'rb') as f:
+#     r = requests.post("https://catbox.moe/user/api.php", data={
+#         "reqtype": "fileupload"
+#     },
+#                       files={
+#                           "fileToUpload": f
+#                       })
+#     print(r.text)
+    # print(r.json())

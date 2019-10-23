@@ -14,7 +14,7 @@ class ButtonHeandler(HTTPMethodView):
             return response.json(model_to_dict(btn))
 
         if "all" in args:
-            btns = Buttons.select(Buttons.name, Buttons.id).execute()
+            btns = Buttons.select(Buttons.name, Buttons.id,Buttons.type).execute()
             res = []
             for b in btns:
                 res.append(model_to_dict(b))
@@ -23,7 +23,7 @@ class ButtonHeandler(HTTPMethodView):
         if "menu_id" in args:
             menu = Menu.get_by_id(args["menu_id"][0])
             butns = list(set([x for sublist in menu.buttons for x in sublist]))
-            butns = Buttons.select(Buttons.name, Buttons.id, Buttons.type, Buttons.callback).where(
+            butns = Buttons.select(Buttons.menu_id,Buttons.name, Buttons.id, Buttons.type, Buttons.callback).where(
                 Buttons.id.in_(butns)).execute()
             res = {}
             for b in butns:
@@ -66,6 +66,7 @@ class ButtonHeandler(HTTPMethodView):
 
     def post(self, request):
         r = request.json
+        print(r)
         if "id" in r:
             del r["id"]
         try:

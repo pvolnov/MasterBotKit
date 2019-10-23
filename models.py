@@ -7,6 +7,7 @@ db = PostgresqlExtDatabase(bdname, user=bduser, password=bdpassword,
 # db.rollback()
 
 class Users(Model):
+    id = IdentityField()
     tel_id = IntegerField(index=True)
     name = TextField(null=True)
     username = TextField(null=True)
@@ -19,9 +20,11 @@ class Users(Model):
 
 
 class Buttons(Model):
-    name = TextField(null=True,unique=True)
+    id = IdentityField()
+    name = TextField(null=True)
     callback = TextField(null=True)
     type = IntegerField(default=0)
+    menu_id = IntegerField(default=0)
     info = JSONField(default={
         "callback": "",
         "changePermit": False,
@@ -49,6 +52,7 @@ class Buttons(Model):
 
 
 class Menu(Model):
+    id = IdentityField()
     name = TextField(null=True,unique=True)
     type = IntegerField(default=0)
     zbutton = JSONField(default={})
@@ -60,6 +64,7 @@ class Menu(Model):
 
 
 class Tables(Model):
+    id = IdentityField()
     name = TextField(null=True)
     columns = JSONField(default={})
 
@@ -69,6 +74,7 @@ class Tables(Model):
 
 
 class Rows(Model):
+    id = IdentityField()
     user = ForeignKeyField(Users,'id')
     table = ForeignKeyField(Tables)
     columns = JSONField(default={})
@@ -79,6 +85,7 @@ class Rows(Model):
 
 
 class Config(Model):
+    id = IdentityField()
     name = TextField()
     value = TextField()
     json = JSONField(default={})
@@ -98,10 +105,10 @@ class Config(Model):
 
 
 
-Users.create_table()
-Buttons.create_table()
-Config.create_table()
-Tables.create_table()
-Rows.create_table()
-Menu.create_table()
+# Users.create_table()
+# Buttons.create_table()
+# Config.create_table()
+# Tables.create_table()
+# Rows.create_table()
+# Menu.create_table()
 
