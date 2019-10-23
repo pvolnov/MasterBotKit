@@ -75,10 +75,11 @@ export default class MenuEditor extends React.Component {
         var main = this;
         axios.get(HOST_API + "menus/",
             {
-                params:{
-                    menu_id:this.state.menuID
+                params: {
+                    menu_id: this.state.menuID
                 }
             }).then((resp) => {
+            console.log(resp.data);
             main.setState({
                     ...resp.data,
                     ...resp.data.zbutton
@@ -119,7 +120,7 @@ export default class MenuEditor extends React.Component {
             id: this.state.menuID
         }).then((resp => {
             toast.success(resp.data);
-        })).catch(e=>toast.error(e.message));
+        })).catch(e => toast.error(e.message));
     };
 
     render() {

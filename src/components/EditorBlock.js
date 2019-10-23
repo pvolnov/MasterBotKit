@@ -70,7 +70,7 @@ export default class EditorBlock extends React.Component {
 
     render() {
         const {
-            activeItem, buttonID, menuID
+            activeItem, buttonID, menuID,type
         } = this.state;
 
         return (
@@ -107,11 +107,11 @@ export default class EditorBlock extends React.Component {
                 </Menu>
                 {
                     (activeItem === 'Button') &&
-                    <ButtonEdit ref={this.buttonRef} buttonID={buttonID} menuID={menuID}/>
+                    <ButtonEdit ref={this.buttonRef} type={type} buttonID={buttonID} menuID={menuID}/>
                 }
                 {
                     (activeItem === 'Menu') &&
-                    <MenuEditor ref={this.menuRef} menuID={menuID}/>
+                    <MenuEditor ref={this.menuRef} type={type} menuID={menuID}/>
                 }
             </Container>
         )

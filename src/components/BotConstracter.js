@@ -18,9 +18,11 @@ export default class BotConstracter extends React.Component {
             actPanel: "menu",//active panel
             menuID: props.menuID,//view id
             popuot: null,
-            buttons: []
+            buttons: [],
+            type:props.type
         };
         this.openBtn = props.openBtn;
+        console.log("type",props.type)
 
     }
 
@@ -36,7 +38,6 @@ export default class BotConstracter extends React.Component {
 
 
     update = () => {
-
         var main = this;
         main.setState({
                 buttons: [],
@@ -76,7 +77,7 @@ export default class BotConstracter extends React.Component {
             .then((resp) => {
                 console.log("MENU RESP", resp.data);
             }).catch((e) => {
-            toast.error(JSON.stringify(e.response.data));
+            toast.error(JSON.stringify(e.response));
         });
     };
 

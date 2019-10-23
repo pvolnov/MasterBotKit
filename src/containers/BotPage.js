@@ -20,6 +20,7 @@ export default class BotPage extends React.Component {
             overlayFixed: false,
             openModal: false,
             menuID: -1,
+            type: 0,
             options: [],
             menuTypes: [
                 {key: 1, value: 0, text: 'Text Menu'},
@@ -47,7 +48,6 @@ export default class BotPage extends React.Component {
     };
 
     update = () => {
-        console.log("update");
         var main = this;
         axios.get(HOST_API + "menus/").then((resp) => {
             var options = [];
@@ -57,11 +57,14 @@ export default class BotPage extends React.Component {
                     key: m,
                     text: menu.name,
                     value: menu.id,
+                    type:menu.type,
+                    icon:menu.type>0?"clipboard outline":"clipboard"
                 });
             }
             main.setState({
                 options: options
             });
+            console.log("options complete",options)
 
             if (main.state.menuID < 1)
                 main.changeMenu({}, {value: options[0].value});
@@ -118,7 +121,7 @@ export default class BotPage extends React.Component {
         })
             .then((resp) => {
                 main.state.menuID = resp.data.id;
-                main.state.options.push({key: resp.data.id, value: resp.data.id, text: "no name"});
+                main.state.options.push({key: resp.data.id, type:data.value, value: resp.data.id, text: "no name"});
                 main.changeMenu({}, {value: resp.data.id});
                 main.forceUpdate();
                 toast.success("Complete");
@@ -129,12 +132,21 @@ export default class BotPage extends React.Component {
     };
 
     changeMenu = (e, data) => {
-        console.log("changeMenu",data.value);
+        var type;
+        for(let m in this.state.options){
+            if(this.state.options[m].value===data.value){
+                console.log("find",this.state.options[m]);
+                type=this.state.options[m].type;
+            }
+        }
+
         this.setState({
-            menuID: -1
+            menuID: -1,
+            type:type
         });
         setTimeout(()=> this.setState({
-            menuID: data.value
+            menuID: data.value,
+            type:type
         }),1);
     };
 
@@ -202,6 +214,7 @@ export default class BotPage extends React.Component {
                                 </Header>
                                 {menuID > -1 &&
                                 <BotConstracter openBtn={this.openBtn}
+                                                type={this.state.type}
                                                  menuID={menuID}/>
                                 }
                             </Segment>
@@ -209,8 +222,8 @@ export default class BotPage extends React.Component {
                         <Grid.Column width={6}>
                             {(activeBtn >= 0 && menuID>-1) &&
                             <EditorBlock
+                                type={this.state.type}
                                 ref={this.editorBlock}
-                                type={menues[menuID] && menues[menuID].type}
                                 buttonID={this.state.activeBtn}
                                 menuID={this.state.menuID}
                                 btn_coord={this.state.btn_coord}

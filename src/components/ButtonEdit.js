@@ -13,11 +13,8 @@ export default class ButtonEdit extends React.Component {
         super(props);
 
         this.state = {
-            btnOptions: [
-                {key: '1', value: 'new', text: 'New', icon: 'add circle'},
-                {key: '2', value: '1', text: 'Главное меню',},
-                {key: '3', value: '22', text: 'Товар'}
-            ],
+            btnOptions: [],
+            inlineBtnOptions: [],
             userTables: [
                 {key: '2', value: '1', text: 'Покупки',},
                 {key: '3', value: '22', text: 'Товар'}
@@ -30,21 +27,21 @@ export default class ButtonEdit extends React.Component {
                 {key: '1', value: '1', text: 'Главное меню',},
                 {key: '2', value: '3', text: 'Магазин товаров'}
             ],
-
             name: "Menu",
             template: "new",
             createNew: true,
-            newButton:true,
+            newButton: true,
             menuID: props.menuID,
             type: props.type,
             buttonID: props.buttonID
         };
+        console.log("Button type",props.type)
 
     }
 
-    loading=(loading)=>{
+    loading = (loading) => {
         this.setState({
-            loading:loading
+            loading: loading
         })
     };
 
@@ -65,7 +62,7 @@ export default class ButtonEdit extends React.Component {
                             {key: c, value: c, text: tables[t].columns[c].name}
                         )
                 }
-                console.log("userTablesColumns",userTablesColumns)
+                console.log("userTablesColumns", userTablesColumns)
             }
             main.setState({
                 userTables: userTables,
@@ -90,20 +87,27 @@ export default class ButtonEdit extends React.Component {
         axios.get(HOST_API + "buttons/", {params: {all: true}}).then((resp) => {
             console.log("menus", resp.data);
             var btnOptions = [];
+            var inlineBtnOptions = [];
             btnOptions.push(
                 {key: '1', value: 'new', text: 'New', icon: 'add circle'}
             );
+            console.log("buttons: ",resp.data)
             for (var m in resp.data) {
-                btnOptions.push(
-                    {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                if (resp.data[m].type === 0) {
+                    btnOptions.push(
+                        {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                } else {
+                    inlineBtnOptions.push({key: m, value: resp.data[m].id, text: resp.data[m].name})
+                }
             }
 
             main.setState({
-                btnOptions: btnOptions
+                btnOptions: btnOptions,
+                inlineBtnOptions: inlineBtnOptions,
             })
         });
 
-        if(this.state.buttonID>0) {
+        if (this.state.buttonID > 0) {
             this.loading(true);
             axios.get(HOST_API + "buttons/", {
                 params: {
@@ -114,7 +118,8 @@ export default class ButtonEdit extends React.Component {
                     main.setState({
                         ...resp.data.info,
                         template: this.state.buttonID,
-                        newButton: false
+                        newButton: false,
+                        createNew:false
                     })
                 }
             )
@@ -165,19 +170,27 @@ export default class ButtonEdit extends React.Component {
         this.setState({[name]: value});
     };
 
+    addFile = (e) => {
+        this.setState({file: e.target.files[0]});
+    };
+
     setAddition = (e, {name, value}) => {
         this.setState({addition: value});
         this.show();
     };
 
     saveAddition = () => {
-        // axios.post(HOST_API + "upload_photo_file/", this.state.file, {
-        //     headers: {
-        //         'Content-Type': this.state.file.type
-        //     }
-        // }).then((r)=>{
-        //     console.log(r.data);
-        // });
+        let formData = new FormData();
+        formData.append('file', this.state.file);
+
+        axios.post(HOST_API + "upload/", formData
+        , {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then((r)=>{
+            console.log(r.data);
+        });
         this.close();
     };
 
@@ -208,6 +221,8 @@ export default class ButtonEdit extends React.Component {
                     id: this.state.buttonID,
                     info: btn,
                     name: btn.name,
+                    menu_id:this.state.menuID,
+                    type:this.state.type
                 }).then((resp) => {
                 axios.patch(HOST_API + "menus/",
                     {
@@ -230,16 +245,16 @@ export default class ButtonEdit extends React.Component {
                     info: btn,
                     name: btn.name,
                 }).then((resp) => {
-                    axios.patch(HOST_API + "menus/",
-                        {
-                            menu_id: main.state.menuID,
-                            btn_coord: btn_coord,
-                            button_id: main.state.buttonID
-                        }).then((r) => {
-                        console.log("upsate_btn ", r.data)
-                    }).catch((e) => {
-                        toast.error(JSON.stringify(e.response));
-                    });
+                axios.patch(HOST_API + "menus/",
+                    {
+                        menu_id: main.state.menuID,
+                        btn_coord: btn_coord,
+                        button_id: main.state.buttonID
+                    }).then((r) => {
+                    console.log("upsate_btn ", r.data)
+                }).catch((e) => {
+                    toast.error(JSON.stringify(e.response));
+                });
                 toast.success(resp.data);
             }).catch((e) => {
                 toast.error(JSON.stringify(e.response));
@@ -270,17 +285,18 @@ export default class ButtonEdit extends React.Component {
 
     render() {
         const {
-            btnOptions, groupsOptions, userTablesColumns, addition,
+            btnOptions, groupsOptions, userTablesColumns, addition,inlineBtnOptions,
             textParsing, createNew, userTables, notification, saveInTable, newButton
         } = this.state;
 
         let useFunk = this.state.funkParams != null && this.state.funkParams != "";
+        let callback = this.state.type > 0;
         // console.log(this.state);
 
         return (
 
             <Segment attached='bottom'>
-                {this.state.loading&&
+                {this.state.loading &&
                 <Dimmer active inverted>
                     <Loader inverted>Loading</Loader>
                 </Dimmer>}
@@ -290,13 +306,13 @@ export default class ButtonEdit extends React.Component {
                     <Modal.Content>
                         <Form>
                             <Form.Group>
-                                <Form.Input widths={16}
-                                            name={"file"}
-                                            value={this.state.value}
-                                            onChange={this.input}
-                                            placeholder='https://toster.ru/q/534793.png'/>
-                                {/*<Form.Input onChange={this.input} type="file" width={11} fluid*/}
-                                {/*name={"file"}/>*/}
+                                {/*<Form.Input widths={16}*/}
+                                            {/*name={"file"}*/}
+                                            {/*value={this.state.file}*/}
+                                            {/*onChange={this.input}*/}
+                                            {/*placeholder='https://toster.ru/q/534793.png'/>*/}
+                                <Form.Input onChange={this.addFile} type="file" width={11} fluid
+                                name={"file"}/>
                                 <Form.Button
                                     widths={4}
                                     onClick={this.saveAddition}
@@ -320,7 +336,7 @@ export default class ButtonEdit extends React.Component {
                             onChange={this.changeTemplate}
                         />
                     </Form.Group>
-                    {this.state.type > 0 &&
+                    {callback &&
                     <Form.Field>
                         <Input fluid value={this.state.callback}
                                label={<Dropdown name={"calBackType"} onSelect={this.select} defaultValue='0' options={[
@@ -464,6 +480,19 @@ export default class ButtonEdit extends React.Component {
                                 })
                             }
                         </Button.Group>
+                    </Form.Group>
+                    <Form.Group widths='equal'>
+                        <Form.Radio fluid name={'add_callback_menu'} onChange={this.change} label='Add Callback'
+                                    toggle checked={this.state.add_callback_menu} width={8}/>
+                        <Form.Select
+                            fluid
+                            name={"callback_menu"}
+                            disabled={!this.state.add_callback_menu}
+                            label='Template'
+                            options={inlineBtnOptions}
+                            value={this.state.callback_menu}
+                            onChange={this.select}
+                        />
                     </Form.Group>
 
                     <Form.Input name={"funkParams"} onChange={this.input} value={this.state.funkParams}
