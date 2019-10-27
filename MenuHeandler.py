@@ -14,7 +14,7 @@ class MenuHeandler(HTTPMethodView):
             res=model_to_dict(menu)
             return response.json(res)
 
-        menu = Menu.select().execute()
+        menu = Menu.select(Menu.name,Menu.id,Menu.type).execute()
         menues = []
         for m in menu:
             menues.append(model_to_dict(m))
@@ -37,7 +37,8 @@ class MenuHeandler(HTTPMethodView):
         r=request.json
         if "btn_coord" in r:
             menu=Menu.get_by_id(r["menu_id"])
-            menu.buttons[r["btn_coord"]["x"]][r["btn_coord"]["y"]]=r["button_id"]
+            print('r["btn_coord"]',r["btn_coord"])
+            menu.buttons[r["btn_coord"]["y"]][r["btn_coord"]["x"]]=r["button_id"]
             menu.save()
             return response.json("ok")
 
@@ -45,6 +46,7 @@ class MenuHeandler(HTTPMethodView):
             Menu.update({Menu.zbutton: r["zbutton"],Menu.name:r["name"]}).where(Menu.id == r["id"]).execute()
             return response.json("ok")
 
+        print(r["buttons"])
         Menu.update({Menu.buttons:r["buttons"]}).where(Menu.id==r["id"]).execute()
         return response.text("ok")
 

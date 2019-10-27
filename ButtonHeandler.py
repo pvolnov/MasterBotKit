@@ -69,6 +69,10 @@ class ButtonHeandler(HTTPMethodView):
         print(r)
         if "id" in r:
             del r["id"]
+        btn = Buttons.get_or_none( (Buttons.name==r["name"]) & (Buttons.menu_id==r["menu_id"]))
+        if btn is not None:
+            Buttons.delete_by_id(btn.id)
+
         try:
             b = Buttons.insert(r).execute()
             return response.json({"id": b})

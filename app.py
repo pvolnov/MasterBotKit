@@ -39,14 +39,6 @@ config["upload"] = "./tests/uploads"
 @app.post("/upload")
 def post_json(request):
     test_file = request.files.get('file')
-
-    file_parameters = {
-        'body': test_file.body,
-        'name': test_file.name,
-        'type': test_file.type,
-    }
-    # print("file_parameters",file_parameters)
-
     r = requests.post("https://catbox.moe/user/api.php", data={
         "reqtype": "fileupload"
     },
@@ -54,8 +46,7 @@ def post_json(request):
                           "fileToUpload": test_file.body
                       })
     print(r.text)
-
-    return response.text("OK")
+    return response.text(r.text)
 
 @app.options("/upload")
 def post_json(request):
