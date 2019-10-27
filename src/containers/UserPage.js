@@ -24,9 +24,11 @@ export default class UserPage extends React.Component {
 
     componentDidMount() {
         var main = this;
+        main.loading(true);
         axios.get(HOST_API + "tables/")
             .then((resp) => {
                 main.setState({tables: resp.data});
+                main.loading(false);
                 this.setTable(resp.data[0].name, resp.data[0].id);
             }).catch((e) => {
             toast.error(JSON.stringify(e.response));
@@ -34,32 +36,35 @@ export default class UserPage extends React.Component {
 
     }
 
+    loading = (loading) => {
+        this.setState({
+            loading: loading
+        })
+    };
+
     setTable = (name, id) => {
         var main = this;
-        axios.get(HOST_API + "tables/" ,{
-            params:{
-                table_id:id
+        main.setState(
+            {
+                activeItem: name,
+            });
+        axios.get(HOST_API + "tables/", {
+            params: {
+                table_id: id
             }
         }).then((resp) => {
-            console.log("Table", resp.data);
-            console.log(main.state.tables);
-            var columns=[];
-           for(let t in main.state.tables){
-               if (main.state.tables[t].id===id){
-                   columns=main.state.tables[t].columns;
-                   break;
-               }
-           }
-
-           console.log(columns);
-
+            var columns = [];
+            for (let t in main.state.tables) {
+                if (main.state.tables[t].id === id) {
+                    columns = main.state.tables[t].columns;
+                    break;
+                }
+            }
             main.setState({columns: []});
             main.setState(
                 {
                     columns: columns,
                     rows: resp.data,
-                    activeItem: name,
-
                 });
         });
 
@@ -75,6 +80,10 @@ export default class UserPage extends React.Component {
                     position="top-left"
                     autoClose={2500}
                 />
+                {this.state.loading &&
+                <Dimmer active inverted>
+                    <Loader inverted>Loading</Loader>
+                </Dimmer>}
 
 
                 <Menu pointing widths={2} secondary color={"grey"}>

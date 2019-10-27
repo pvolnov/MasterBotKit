@@ -7,6 +7,7 @@ import axios from "axios";
 import {HOST} from "../constants/config";
 import AdminPage from "./AdminPage";
 import BotPage from "./BotPage";
+import IconMBK from "../img/telegram.png"
 
 
 export default class Home extends React.Component {
@@ -31,7 +32,7 @@ export default class Home extends React.Component {
                 {key: 3, value: 'payment', text: 'Payment'},
             ],
             menu: [],
-            activeItem:"bot"
+            activeItem: "bot"
             // activeItem:"admin"
         }
 
@@ -79,12 +80,21 @@ export default class Home extends React.Component {
     };
 
 
-
     render() {
         const {activeItem, menuID, menu, openModal, menuTypes} = this.state;
 
         return (
             <Container className={"Page"}>
+                <style>
+                    {`
+      body {
+          background-image: url("http://liondocs.com/wp-content/uploads/2014/12/Website-Background.jpg");
+          background-size: cover;
+      }
+
+    `}
+                </style>
+
                 <ToastContainer
                     position="top-left"
                     autoClose={2500}
@@ -108,17 +118,21 @@ export default class Home extends React.Component {
                 </Modal>
 
 
-                <Menu pointing widths={2} secondary color={"grey"}>
+                <Menu pointing stackable>
+                    <Menu.Item>
+                        <img src={IconMBK}/>
+                    </Menu.Item>
+
                     <Menu.Item
                         name='bot'
                         active={activeItem === 'bot'}
                         onClick={this.handleItemClick}
-                    />
+                    >Bot constructor</Menu.Item>
                     <Menu.Item
                         name='admin'
                         active={activeItem === 'admin'}
                         onClick={this.handleItemClick}
-                    />
+                    >Admin panel assembly</Menu.Item>
                 </Menu>
 
                 {activeItem === 'bot' &&

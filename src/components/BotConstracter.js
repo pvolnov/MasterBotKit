@@ -108,9 +108,10 @@ export default class BotConstracter extends React.Component {
         setTimeout(() => {
             buttons[index].splice(c, 1);
             this.state.buttons=buttons;
+            console.log(this.state.buttons);
             this.forceUpdate();
-        }, 1)
-        this.uploadMenu();
+            this.uploadMenu();
+        }, 1);
     };
 
 
@@ -151,7 +152,7 @@ export default class BotConstracter extends React.Component {
                                             <Button circular
                                                     onClick={() => this.addButton(index)}
                                                     row={index}
-                                                    color={'blue'}
+                                                    color={'grey'}
                                                     size={'huge'} icon={'plus'}/>
                                         }/>
 

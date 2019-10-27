@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Button, Checkbox, Form, Icon, Input, Modal, Table, TextArea} from 'semantic-ui-react'
+import {Button, Checkbox, Dimmer, Form, Icon, Input, Loader, Modal, Table, TextArea} from 'semantic-ui-react'
 import axios from "axios";
 import {HOST_API} from "../constants/config";
 import {toast} from "react-toastify";
@@ -74,10 +74,17 @@ export default class UserTable extends React.Component {
         this.patch_table_data[id][name] = value;
     };
 
+    loading=(loading)=>{
+        this.setState({
+            loading:loading
+        })
+    };
+
     render() {
 
         return (
             <Table celled compact definition>
+
                 <Modal size={"mini"} open={this.state.openModal} onClose={this.close}>
                     <Modal.Header>Send messeges</Modal.Header>
                     <Modal.Content>
@@ -111,7 +118,7 @@ export default class UserTable extends React.Component {
                     </Table.Row>
                 </Table.Header>
 
-                <Table.Body>
+                <Table.Body >
                     <Table.HeaderCell/>
                     {
                         this.state.rows.map((row, y) => {

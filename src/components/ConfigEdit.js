@@ -135,6 +135,7 @@ export default class ConfigEdit extends React.Component {
                             <Form.Input fluid label='Admin login' readOnly defaultValue={username} placeholder='Admin'/>
                             <Form.Input fluid label='Admin password'
                                         name={"password"}
+                                        value={this.state.password}
                                         action={{
                                             color: 'teal',
                                             onClick: () => this.setState({showPas: !showPas}),
@@ -145,6 +146,7 @@ export default class ConfigEdit extends React.Component {
                             <Form.Input fluid label='Confirm password'
                                         onChange={this.input}
                                         name={"password2"}
+                                        value={this.state.password2}
                                         type={showPas ? "text" : "password"} placeholder='Admin'/>
                         </Form.Group>
 

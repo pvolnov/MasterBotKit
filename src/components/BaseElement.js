@@ -11,12 +11,14 @@ export default class BaseElement extends React.Component {
         this.deleteBtn = props.deleteBtn;
         // this.store = props.store;
         // this.dispatch = props.dispatch;
-
+        var fname = this.props.button && this.props.button.name;
+        if (fname){
+            fname=fname.split(' ')[0];
+        }
         this.state = {
-            name: "New Button",
-            cmd: "Не выбрано",
-            discr: "Discription",
-            id: 0,
+            name: fname?fname:"New Button",
+            cmd: this.props.button.name,
+            id: this.props.button.id,
             ...this.props.button
         };
         this.deliting=false;
@@ -41,8 +43,8 @@ export default class BaseElement extends React.Component {
                     {/*rounded*/}
                     {/*src={TelegramIco}*/}
                     {/*/>*/}
-                    <Card.Header>{this.state.name}</Card.Header>
-                    <Card.Meta>{this.state.cmd}</Card.Meta>
+                    <Card.Header textAlign={"center"}>{this.state.name}</Card.Header>
+                    {/*<Card.Meta>{this.state.cmd}</Card.Meta>*/}
                     {/*<Card.Description>*/}
                     {/*{this.state.discr}*/}
                     {/*</Card.Description>*/}

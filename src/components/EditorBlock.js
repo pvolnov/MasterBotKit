@@ -32,7 +32,7 @@ export default class EditorBlock extends React.Component {
         this.storerage = props.storerage;
 
         this.state = {
-            textParsing: "no",
+            textParsing: "None",
             activeItem: 'Button',
             label: "Menu",
             template: "new",
@@ -51,6 +51,7 @@ export default class EditorBlock extends React.Component {
     };
 
     save = () => {
+        console.log(this.state.btn_coord)
         if (this.state.activeItem === 'Button')
             this.buttonRef.current.save(this.state.btn_coord);
         else

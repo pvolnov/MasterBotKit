@@ -15,27 +15,19 @@ export default class ButtonEdit extends React.Component {
         this.state = {
             btnOptions: [],
             inlineBtnOptions: [],
-            userTables: [
-                {key: '2', value: '1', text: 'Покупки',},
-                {key: '3', value: '22', text: 'Товар'}
-            ],
-            userTablesColumns: [
-                {key: '2', value: '1', text: 'Главное меню',},
-                {key: '3', value: '22', text: 'Товар'}
-            ],
-            groupsOptions: [
-                {key: '1', value: '1', text: 'Главное меню',},
-                {key: '2', value: '3', text: 'Магазин товаров'}
-            ],
+            userTables: [],
+            userTablesColumns: [],
+            groupsOptions: [],
+            inlineGroupsOptions: [],
             name: "Menu",
             template: "new",
-            createNew: true,
+            textParsing: "None",
             newButton: true,
             menuID: props.menuID,
             type: props.type,
             buttonID: props.buttonID
         };
-        console.log("Button type",props.type)
+        console.log("Button type", props.type)
 
     }
 
@@ -59,7 +51,7 @@ export default class ButtonEdit extends React.Component {
                 for (var c in tables[t].columns) {
                     if (tables[t].columns[c].default == false)
                         userTablesColumns[tables[t].id].push(
-                            {key: c, value: c, text: tables[t].columns[c].name}
+                            {key: c, value: tables[t].columns[c].name, text: tables[t].columns[c].name}
                         )
                 }
                 console.log("userTablesColumns", userTablesColumns)
@@ -74,13 +66,20 @@ export default class ButtonEdit extends React.Component {
         axios.get(HOST_API + "menus/").then((resp) => {
             console.log("menus", resp.data);
             var groupsOptions = [];
+            var inlineGroupsOptions = [];
 
             for (var m in resp.data) {
-                groupsOptions.push(
-                    {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                if (resp.data[m].type > 0) {
+                    inlineGroupsOptions.push(
+                        {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                } else {
+                    groupsOptions.push(
+                        {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                }
             }
             main.setState({
-                groupsOptions: groupsOptions
+                groupsOptions: groupsOptions,
+                inlineGroupsOptions: inlineGroupsOptions,
             })
         });
 
@@ -91,7 +90,7 @@ export default class ButtonEdit extends React.Component {
             btnOptions.push(
                 {key: '1', value: 'new', text: 'New', icon: 'add circle'}
             );
-            console.log("buttons: ",resp.data)
+            console.log("buttons: ", resp.data)
             for (var m in resp.data) {
                 if (resp.data[m].type === 0) {
                     btnOptions.push(
@@ -118,8 +117,7 @@ export default class ButtonEdit extends React.Component {
                     main.setState({
                         ...resp.data.info,
                         template: this.state.buttonID,
-                        newButton: false,
-                        createNew:false
+                        newButton: false
                     })
                 }
             )
@@ -147,10 +145,9 @@ export default class ButtonEdit extends React.Component {
                     main.loading(false);
                     main.setState({
                         ...resp.data.info,
+                        name: main.state.name,
+                        buttonID: main.state.buttonID,
                         template: value,
-                        newButton: false,
-                        createNew: false,
-                        buttonID: value
                     })
 
                 }
@@ -180,15 +177,18 @@ export default class ButtonEdit extends React.Component {
     };
 
     saveAddition = () => {
+        var main = this;
         let formData = new FormData();
         formData.append('file', this.state.file);
 
         axios.post(HOST_API + "upload/", formData
-        , {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        }).then((r)=>{
+            , {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((r) => {
+            toast.info("Файл загружен");
+            main.setState({"file_url": r.data});
             console.log(r.data);
         });
         this.close();
@@ -205,25 +205,32 @@ export default class ButtonEdit extends React.Component {
             return;
         }
         var main = this;
+        var newButton = this.state.newButton;
         console.log("Save");
         delete btn.btnOptions;
+        delete btn.inlineBtnOptions;
         delete btn.userTables;
         delete btn.userTablesColumns;
         delete btn.groupsOptions;
+        delete btn.inlineGroupsOptions;
         delete btn.menuID;
         delete btn.buttonID;
         delete btn.newButton;
         delete btn.loading;
+        delete btn.template;
 
-        if (this.state.createNew || this.state.template === "new") {
+        if (newButton) {
             axios.post(HOST_API + "buttons/",
                 {
                     id: this.state.buttonID,
                     info: btn,
                     name: btn.name,
-                    menu_id:this.state.menuID,
-                    type:this.state.type
+                    menu_id: this.state.menuID,
+                    type: this.state.type
                 }).then((resp) => {
+                main.setState({
+                    buttonID: resp.data.id
+                });
                 axios.patch(HOST_API + "menus/",
                     {
                         menu_id: main.state.menuID,
@@ -285,8 +292,8 @@ export default class ButtonEdit extends React.Component {
 
     render() {
         const {
-            btnOptions, groupsOptions, userTablesColumns, addition,inlineBtnOptions,
-            textParsing, createNew, userTables, notification, saveInTable, newButton
+            btnOptions, groupsOptions, userTablesColumns, addition, inlineBtnOptions, editLastMessage,
+            textParsing, userTables, notification, saveInTable, newButton, changeGroup, inlineGroupsOptions
         } = this.state;
 
         let useFunk = this.state.funkParams != null && this.state.funkParams != "";
@@ -307,12 +314,12 @@ export default class ButtonEdit extends React.Component {
                         <Form>
                             <Form.Group>
                                 {/*<Form.Input widths={16}*/}
-                                            {/*name={"file"}*/}
-                                            {/*value={this.state.file}*/}
-                                            {/*onChange={this.input}*/}
-                                            {/*placeholder='https://toster.ru/q/534793.png'/>*/}
+                                {/*name={"file"}*/}
+                                {/*value={this.state.file}*/}
+                                {/*onChange={this.input}*/}
+                                {/*placeholder='https://toster.ru/q/534793.png'/>*/}
                                 <Form.Input onChange={this.addFile} type="file" width={11} fluid
-                                name={"file"}/>
+                                            name={"file"}/>
                                 <Form.Button
                                     widths={4}
                                     onClick={this.saveAddition}
@@ -326,12 +333,12 @@ export default class ButtonEdit extends React.Component {
                     <Form.Group widths='equal'>
                         <Form.Input fluid label='Label' value={this.state.name}
                                     name={"name"} onChange={this.input}
-                                    disabled={!newButton && !createNew} placeholder='Menu'/>
+                                    disabled={!newButton} placeholder='Menu'/>
                         <Form.Select
                             fluid
                             name={"template"}
                             label='Template'
-                            options={btnOptions}
+                            options={callback ? inlineBtnOptions : btnOptions}
                             value={this.state.template}
                             onChange={this.changeTemplate}
                         />
@@ -339,9 +346,9 @@ export default class ButtonEdit extends React.Component {
                     {callback &&
                     <Form.Field>
                         <Input fluid value={this.state.callback}
-                               label={<Dropdown name={"calBackType"} onSelect={this.select} defaultValue='0' options={[
-                                   {key: '1', value: '0', text: 'data',},
-                                   {key: '2', value: '1', text: 'url'}
+                               label={<Dropdown name={"callbackType"} onSelect={this.select} defaultValue={0} options={[
+                                   {key: '1', value: 0, text: 'data',},
+                                   {key: '2', value: 1, text: 'url'}
                                ]}/>}
                                labelPosition='right'
                                name={"callback"} onChange={this.input} placeholder='Callback'/>
@@ -422,12 +429,12 @@ export default class ButtonEdit extends React.Component {
                                        name={"notificationText"}
                                        onChange={this.input}
                                        value={this.state.notificationText}
-                                       placeholder='Пользователь %USER% добавил новый товар'/> : null
+                                       placeholder='Пользователь %NAME% добавил новый товар в %TIME%'/> : null
 
                     }
                     <Form.Group>
                         <Form.Radio fluid name={'changeGroup'} onChange={this.change} label='Change group'
-                                    toggle checked={this.state.changeGroup} width={8}/>
+                                    toggle checked={changeGroup} width={8}/>
                         <Form.Select
                             width={8}
                             fluid
@@ -448,22 +455,22 @@ export default class ButtonEdit extends React.Component {
                         <Form.Radio disabled={useFunk}
                                     name={"textParsing"}
                                     label='None'
-                                    value='no'
-                                    checked={textParsing === 'no'}
+                                    value='None'
+                                    checked={textParsing === 'None'}
                                     onChange={this.select}
                         />
                         <Form.Radio disabled={useFunk}
                                     name={"textParsing"}
                                     label='Markdown'
                                     value='markdown'
-                                    checked={textParsing === 'markup'}
+                                    checked={textParsing === 'markdown'}
                                     onChange={this.select}
                         />
                         <Form.Radio disabled={useFunk}
                                     name={"textParsing"}
                                     label='HTML'
                                     value='HTML'
-                                    checked={textParsing === 'html'}
+                                    checked={textParsing === 'HTML'}
                                     onChange={this.select}
                         />
                     </Form.Group>
@@ -473,7 +480,7 @@ export default class ButtonEdit extends React.Component {
                                 ["file", "photo", "video", "microphone"].map((label) => {
                                     if (addition == label) {
                                         return (<Button name={"addition"} active secondary
-                                                        value={label} icon={label} onClick={this.input}/>)
+                                                        value={""} icon={label} onClick={this.input}/>)
                                     } else
                                         return (<Button name={"addition"} disabled={useFunk}
                                                         value={label} icon={label} onClick={this.setAddition}/>)
@@ -483,24 +490,27 @@ export default class ButtonEdit extends React.Component {
                     </Form.Group>
                     <Form.Group widths='equal'>
                         <Form.Radio fluid name={'add_callback_menu'} onChange={this.change} label='Add Callback'
-                                    toggle checked={this.state.add_callback_menu} width={8}/>
+                                    toggle checked={this.state.add_callback_menu} width={8} disabled={changeGroup}/>
                         <Form.Select
-                            fluid
+                            fluid search
                             name={"callback_menu"}
-                            disabled={!this.state.add_callback_menu}
+                            disabled={!this.state.add_callback_menu || changeGroup}
                             label='Template'
-                            options={inlineBtnOptions}
+                            options={inlineGroupsOptions}
                             value={this.state.callback_menu}
                             onChange={this.select}
                         />
                     </Form.Group>
+                    <Form.Checkbox label='Редактировать собщение, а не отправлять новое'
+                                   checked={editLastMessage}
+                                   onChange={this.change} name={"editLastMessage"}/>
 
                     <Form.Input name={"funkParams"} onChange={this.input} value={this.state.funkParams}
                                 placeholder='-f start menu' label={"Answer from function"}/>
 
-                    <Form.Checkbox label='Создать новый элемент с этими параметрами'
-                                   disabled={newButton} checked={createNew}
-                                   onChange={this.change} name={"createNew"}/>
+                    {/*<Form.Checkbox label='Создать новый элемент с этими параметрами'*/}
+                    {/*disabled={newButton} checked={createNew}*/}
+                    {/*onChange={this.change} name={"createNew"}/>*/}
 
                 </Form>
             </Segment>

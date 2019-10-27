@@ -51,7 +51,7 @@ export default class MenuEditor extends React.Component {
                 {key: 3, value: 'video', text: 'Video'},
                 {key: 4, value: 'file', text: 'File'},
             ],
-            textParsing: "no",
+            textParsing: "None",
             activeItem: 'Menu',
             name: "Menu",
             menuID: props.menuID,
@@ -240,22 +240,22 @@ export default class MenuEditor extends React.Component {
                                 <Form.Radio disabled={useFunk}
                                             name={"textParsing"}
                                             label='None'
-                                            value='no'
-                                            checked={textParsing === 'no'}
+                                            value='None'
+                                            checked={textParsing === 'None'}
                                             onChange={this.select}
                                 />
                                 <Form.Radio disabled={useFunk}
                                             name={"textParsing"}
-                                            label='Markup'
-                                            value='markup'
-                                            checked={textParsing === 'markup'}
+                                            label='Markdown'
+                                            value='markdown'
+                                            checked={textParsing === 'markdown'}
                                             onChange={this.select}
                                 />
                                 <Form.Radio disabled={useFunk}
                                             name={"textParsing"}
                                             label='HTML'
-                                            value='html'
-                                            checked={textParsing === 'html'}
+                                            value='HTML'
+                                            checked={textParsing === 'HTML'}
                                             onChange={this.select}
                                 />
                             </Form.Group>
