@@ -11,6 +11,7 @@ class Users(Model):
     tel_id = IntegerField(index=True)
     name = TextField(null=True)
     username = TextField(null=True)
+    avatar=TextField(null=True)
     cms = IntegerField(default=0)
     level = IntegerField(default=0)
 
@@ -75,7 +76,7 @@ class Tables(Model):
 
 class Rows(Model):
     id = IdentityField()
-    user = ForeignKeyField(Users,'id')
+    user = ForeignKeyField(Users,'id',lazy_load=False)
     table = ForeignKeyField(Tables)
     columns = JSONField(default={})
 
@@ -94,8 +95,21 @@ class Config(Model):
         database = db
         db_table = 'Config'
 
+class Messages(Model):
+    id = IdentityField()
+    text = TextField()
+    type = IntegerField()
+    info=JSONField(null=True)
+    date=TextField(null=True)
+    user = ForeignKeyField(Users,'id',lazy_load=False)
+
+    class Meta:
+        database = db
+        db_table = 'Messages'
 
 
+
+# Messages.drop_table()
 # Config.drop_table()
 # Rows.drop_table()
 # Tables.drop_table()
@@ -106,6 +120,7 @@ class Config(Model):
 
 
 # Users.create_table()
+# Messages.create_table()
 # Buttons.create_table()
 # Config.create_table()
 # Tables.create_table()
