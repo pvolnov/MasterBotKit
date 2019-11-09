@@ -8,7 +8,7 @@ import {HOST} from "../constants/config";
 import AdminPage from "./AdminPage";
 import BotPage from "./BotPage";
 import IconMBK from "../img/telegram.png"
-
+import cookie from "react-cookie";
 
 export default class Home extends React.Component {
     constructor(props) {
@@ -34,7 +34,9 @@ export default class Home extends React.Component {
             menu: [],
             activeItem: "bot"
             // activeItem:"admin"
-        }
+        };
+
+
 
 
     }
@@ -85,16 +87,6 @@ export default class Home extends React.Component {
 
         return (
             <Container className={"Page"}>
-                <style>
-                    {`
-      body {
-          background-image: url("http://liondocs.com/wp-content/uploads/2014/12/Website-Background.jpg");
-          background-size: cover;
-      }
-
-    `}
-                </style>
-
                 <ToastContainer
                     position="top-left"
                     autoClose={2500}
@@ -116,7 +108,6 @@ export default class Home extends React.Component {
                         </Form>
                     </Modal.Actions>
                 </Modal>
-
 
                 <Menu pointing stackable>
                     <Menu.Item>

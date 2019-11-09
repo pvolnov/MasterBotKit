@@ -163,7 +163,6 @@ export default class ButtonEdit extends React.Component {
     };
 
     input = (e, {name, value}) => {
-        console.log(value);
         this.setState({[name]: value});
     };
 
@@ -313,11 +312,6 @@ export default class ButtonEdit extends React.Component {
                     <Modal.Content>
                         <Form>
                             <Form.Group>
-                                {/*<Form.Input widths={16}*/}
-                                {/*name={"file"}*/}
-                                {/*value={this.state.file}*/}
-                                {/*onChange={this.input}*/}
-                                {/*placeholder='https://toster.ru/q/534793.png'/>*/}
                                 <Form.Input onChange={this.addFile} type="file" width={11} fluid
                                             name={"file"}/>
                                 <Form.Button
@@ -502,8 +496,12 @@ export default class ButtonEdit extends React.Component {
                         />
                     </Form.Group>
                     <Form.Checkbox label='Редактировать собщение, а не отправлять новое'
-                                   checked={editLastMessage}
+                                   checked={editLastMessage} disabled={this.state.autoResponse}
                                    onChange={this.change} name={"editLastMessage"}/>
+
+                    <Form.Checkbox label='Не отвечать'
+                                   checked={this.state.autoResponse}
+                                   onChange={this.change} name={"autoResponse"}/>
 
                     <Form.Input name={"funkParams"} onChange={this.input} value={this.state.funkParams}
                                 placeholder='-f start menu' label={"Answer from function"}/>

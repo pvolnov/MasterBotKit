@@ -26,6 +26,10 @@ export default class UserTable extends React.Component {
 
     close = () => this.setState({openModal: false});
 
+    input = (e, {name, value}) => {
+        console.log(value);
+        this.setState({[name]: value});
+    };
 
     selectUser = (chatid) => {
         if (this.rows_ids.indexOf(chatid) < 0) {
@@ -128,7 +132,7 @@ export default class UserTable extends React.Component {
                                 </Table.Cell>
                                 {
                                     row.row.map((col, i) => {
-                                        if (this.state.columns[i].edit) {
+                                        if (this.state.columns[i].edit && !this.state.columns[i].default) {
                                             return <Table.Cell>
                                                 <Form.Input
                                                     placeholder='value'
@@ -142,7 +146,6 @@ export default class UserTable extends React.Component {
                                     })
                                 }
                             </Table.Row>
-
                         })
                     }
                 </Table.Body>

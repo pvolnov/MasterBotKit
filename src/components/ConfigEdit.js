@@ -75,7 +75,6 @@ export default class ConfigEdit extends React.Component {
     };
 
     input = (e, {name, value}) => {
-        console.log(value);
         this.setState({[name]: value});
     };
 

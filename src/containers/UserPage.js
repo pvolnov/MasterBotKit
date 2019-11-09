@@ -5,6 +5,7 @@ import axios from "axios";
 import {HOST_API} from "../constants/config";
 import UserTable from "../components/UserTable";
 import {toast, ToastContainer} from "react-toastify";
+import MessagesMenu from "../components/MessagesMenu";
 
 
 export default class UserPage extends React.Component {
@@ -16,7 +17,8 @@ export default class UserPage extends React.Component {
         this.state = {
             rows: [],
             columns: [],
-            tables: []
+            tables: [],
+            messages:true
         }
 
 
@@ -29,7 +31,7 @@ export default class UserPage extends React.Component {
             .then((resp) => {
                 main.setState({tables: resp.data});
                 main.loading(false);
-                this.setTable(resp.data[0].name, resp.data[0].id);
+                // this.setTable(resp.data[0].name, resp.data[0].id);
             }).catch((e) => {
             toast.error(JSON.stringify(e.response));
         });
@@ -44,9 +46,11 @@ export default class UserPage extends React.Component {
 
     setTable = (name, id) => {
         var main = this;
+        this.loading(true);
         main.setState(
             {
                 activeItem: name,
+                messages:false
             });
         axios.get(HOST_API + "tables/", {
             params: {
@@ -66,6 +70,7 @@ export default class UserPage extends React.Component {
                     columns: columns,
                     rows: resp.data,
                 });
+            this.loading(false);
         });
 
     };
@@ -80,13 +85,13 @@ export default class UserPage extends React.Component {
                     position="top-left"
                     autoClose={2500}
                 />
-                {this.state.loading &&
+                { (this.state.loading) &&
                 <Dimmer active inverted>
                     <Loader inverted>Loading</Loader>
                 </Dimmer>}
 
 
-                <Menu pointing widths={2} secondary color={"grey"}>
+                <Menu pointing widths={this.state.tables.length+1} >
                     {
                         this.state.tables.map((table, k) => {
                             return <Menu.Item
@@ -96,9 +101,17 @@ export default class UserPage extends React.Component {
                             />
                         })
                     }
+                    <Menu.Item
+                        name={"messages"}
+                        active={this.state.messages}
+                        onClick={() => this.setState({messages:true})}
+                    />
                 </Menu>
-                {this.state.columns.length > 0 &&
+                {(this.state.columns.length > 0 && !this.state.messages) &&
                 <UserTable rows={this.state.rows} columns={this.state.columns}/>
+                }
+                {this.state.messages &&
+                    <MessagesMenu/>
                 }
             </Container>
         )

@@ -1,21 +1,6 @@
 import React from 'react';
 
-import {
-    Button,
-    Card,
-    Container,
-    Divider,
-    Grid,
-    Header,
-    Icon,
-    Image,
-    Input,
-    Menu,
-    Popup,
-    Segment,
-    Form, Radio
-} from 'semantic-ui-react'
-import BaseElement from "./BaseElement";
+import {Button, Dimmer, Dropdown, Form, Header, Input, Loader, Modal, Segment} from 'semantic-ui-react'
 import axios from "axios";
 import {HOST_API} from "../constants/config";
 import {toast} from "react-toastify";
@@ -91,6 +76,64 @@ export default class MenuEditor extends React.Component {
             toast.error(JSON.stringify(e.response));
         });
     };
+    loading = (loading) => {
+        this.setState({
+            loading: loading
+        })
+    };
+
+
+    reload(btn) {
+        var extend = require('util')._extend;
+        this.state = extend(this.state, btn);
+        this.forceUpdate();
+    }
+
+    addFile = (e) => {
+        this.setState({file: e.target.files[0]});
+    };
+
+    setAddition = (e, {name, value}) => {
+        this.setState({addition: value});
+        this.show();
+    };
+
+    saveAddition = () => {
+        var main = this;
+        let formData = new FormData();
+        formData.append('file', this.state.file);
+
+        axios.post(HOST_API + "upload/", formData
+            , {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((r) => {
+            toast.info("Файл загружен");
+            main.setState({"file_url": r.data});
+            console.log(r.data);
+        });
+        this.close();
+    };
+
+    drop = () => {
+        axios.delete(HOST_API + "buttons/",
+            {
+                params: {
+                    button_id: this.state.buttonID
+                }
+            }).then((resp) => {
+            toast.success(resp.data);
+        }).catch((e) => {
+            toast.error(JSON.stringify(e.response));
+        });
+    };
+
+    show = () => {
+        this.setState({openModal: true});
+    };
+
+    close = () => this.setState({openModal: false});
 
 
     changeTemplate = (e, {name, value}) => {
@@ -125,9 +168,10 @@ export default class MenuEditor extends React.Component {
 
     render() {
         const {
-            typesOptions, btnOptions, groupsOptions, userTablesColumns, addition,
+            typesOptions, btnOptions, groupsOptions, userTablesColumns, addition,changeGroup,
             textParsing, createNew, userTables, notification, saveInTable, funkParamsEnable
         } = this.state;
+
         let newButton = (this.state.template == "new");
         let useFunk = this.state.funkParams != null && this.state.funkParams != "";
 
@@ -160,16 +204,59 @@ export default class MenuEditor extends React.Component {
                     <Header as='h4' attached='top' block>
                         Defaul Responce
                     </Header>
-                    <Segment>
+                    <Segment attached='bottom'>
+                        {this.state.loading &&
+                        <Dimmer active inverted>
+                            <Loader inverted>Loading</Loader>
+                        </Dimmer>}
+
+                        <Modal size={"mini"} open={this.state.openModal} onClose={this.close}>
+                            <Modal.Header>Сhoose File</Modal.Header>
+                            <Modal.Content>
+                                <Form>
+                                    <Form.Group>
+                                        <Form.Input onChange={this.addFile} type="file" width={11} fluid
+                                                    name={"file"}/>
+                                        <Form.Button
+                                            widths={4}
+                                            onClick={this.saveAddition}
+                                            color={"green"}
+                                        >Save</Form.Button>
+                                    </Form.Group>
+                                </Form>
+                            </Modal.Content>
+                        </Modal>
                         <Form>
-                            <Form.Select
-                                fluid
-                                label={"Response Type"}
-                                name={"responseType"}
-                                value={this.state.responseType}
-                                options={typesOptions}
-                                onChange={this.select}
-                            />
+                            <Form.Group>
+                                <Form.Radio fluid name={'levelPermit'} onChange={this.change} label='Only for level'
+                                            toggle checked={this.state.levelPermit} width={12}/>
+                                <Form.Input
+                                    width={4}
+                                    fluid
+                                    type={"number"}
+                                    min={0}
+                                    max={10}
+                                    disabled={!this.state.levelPermit}
+                                    name={"constLevel"}
+                                    value={this.state.constLevel}
+                                    onChange={this.input}
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Radio fluid name={'changePermit'} onChange={this.change} label='Change user level'
+                                            toggle checked={this.state.changePermit} width={12}/>
+                                <Form.Input
+                                    width={4}
+                                    fluid
+                                    type={"number"}
+                                    min={0}
+                                    max={10}
+                                    disabled={!this.state.changePermit}
+                                    name={"newLevel"}
+                                    value={this.state.newLevel}
+                                    onChange={this.input}
+                                />
+                            </Form.Group>
                             <Form.Group>
                                 <Form.Radio fluid name={'saveInTable'} onChange={this.change} label='Save in table'
                                             toggle checked={this.state.saveInTable} width={6}/>
@@ -187,7 +274,7 @@ export default class MenuEditor extends React.Component {
                                     fluid
                                     disabled={!saveInTable}
                                     name={"columnName"}
-                                    options={userTablesColumns}
+                                    options={userTablesColumns[this.state.tableName]}
                                     value={this.state.columnName}
                                     onChange={this.select}
                                 />
@@ -215,19 +302,20 @@ export default class MenuEditor extends React.Component {
                                                name={"notificationText"}
                                                onChange={this.input}
                                                value={this.state.notificationText}
-                                               placeholder='Пользователь %USER% добавил новый товар'/> : null
+                                               placeholder='Пользователь %NAME% добавил новый товар в %TIME%'/> : null
 
                             }
                             <Form.Group>
                                 <Form.Radio fluid name={'changeGroup'} onChange={this.change} label='Change group'
-                                            toggle checked={this.state.changeGroup} width={8}/>
+                                            toggle checked={changeGroup} width={8}/>
                                 <Form.Select
                                     width={8}
                                     fluid
                                     disabled={!this.state.changeGroup}
+                                    value={this.state.newGroupId}
                                     name={"newGroupId"}
                                     options={groupsOptions}
-                                    onChange={this.change}
+                                    onChange={this.select}
                                 />
                             </Form.Group>
                             <Form.TextArea disabled={useFunk} label='Response'
@@ -264,19 +352,22 @@ export default class MenuEditor extends React.Component {
                                     {
                                         ["file", "photo", "video", "microphone"].map((label) => {
                                             if (addition == label) {
-                                                return (<Button name={"addition"} active basic color={'gray'}
-                                                                value={label} icon={label} onClick={this.change}/>)
+                                                return (<Button name={"addition"} active secondary
+                                                                value={""} icon={label} onClick={this.input}/>)
                                             } else
                                                 return (<Button name={"addition"} disabled={useFunk}
-                                                                value={label} icon={label} onClick={this.change}/>)
+                                                                value={label} icon={label} onClick={this.setAddition}/>)
                                         })
                                     }
                                 </Button.Group>
                             </Form.Group>
 
-                            <Form.Input name={"funkParams"} onChange={this.input}
-                                        placeholder='-f start %TEXT%' label={"Answer from function"}/>
+                            <Form.Checkbox label='Не отвечать'
+                                           checked={this.state.autoResponse}
+                                           onChange={this.change} name={"autoResponse"}/>
 
+                            <Form.Input name={"funkParams"} onChange={this.input} value={this.state.funkParams}
+                                        placeholder='-f start menu' label={"Answer from function"}/>
 
                         </Form>
                     </Segment>
