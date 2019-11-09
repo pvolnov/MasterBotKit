@@ -47,7 +47,15 @@ class MenuHeandler(HTTPMethodView):
             return response.json("ok")
 
         print(r["buttons"])
-        Menu.update({Menu.buttons:r["buttons"]}).where(Menu.id==r["id"]).execute()
+        new_buttons=[]
+        for row in r["buttons"]:
+            btn_row=[]
+            for b in row:
+                if b>0:
+                    btn_row.append(b)
+            new_buttons.append(btn_row)
+
+        Menu.update({Menu.buttons:new_buttons}).where(Menu.id==r["id"]).execute()
         return response.text("ok")
 
     def delete(self, request):
