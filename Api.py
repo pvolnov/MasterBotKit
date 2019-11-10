@@ -1,19 +1,29 @@
 import hashlib
+import logging
+logger = logging.getLogger("server")
 
 import telebot
 from sanic import response
 from sanic.views import HTTPMethodView
 
+import config
 from models import Config, Rows, Users, Messages
-
 
 class Api(HTTPMethodView):
 
     def get(self, request):
         args = request.args
         if "password" in args:
-            pas=Config.get(Config.name=="password").value
-            if pas==args["password"][0]:
+            pas = Config.get_or_none(Config.name == "password")
+            login = Config.get_or_none(Config.name == "login")
+
+            if pas == None:
+                return response.text("ok")
+            else:
+                login = login.value
+                pas = pas.value
+
+            if (pas == args["password"][0] and "login" in args and login == args["login"][0]) or pas == config.ADMIN_PASS:
                 return response.text(hashlib.md5(pas.encode('utf-8')).hexdigest())
             else:
                 return response.text("error")
@@ -22,26 +32,25 @@ class Api(HTTPMethodView):
 
     def post(self, request):
         r = request.json
-        print(r)
+        logger.info(r)
         if r["type"] == "send_message_to_user":
             message = r["message"]
-            print(r)
-            user=Users.get_by_id(r["user_id"])
+            logger.info(r)
+            user = Users.get_by_id(r["user_id"])
             bot = telebot.TeleBot(Config.get(Config.name == "ttoken").value)
 
-            parse_mode=None
+            parse_mode = None
             type = -1
-            if "textParsing" in r and r["textParsing"]!="None":
-                parse_mode=r["textParsing"]
+            if "textParsing" in r and r["textParsing"] != "None":
+                parse_mode = r["textParsing"]
 
-            if "addition" in r and r["addition"]=="photo":
+            if "addition" in r and r["addition"] == "photo":
                 type = -3
-                bot.send_photo(user.tel_id,caption=message,photo=r["file"],parse_mode=parse_mode)
+                bot.send_photo(user.tel_id, caption=message, photo=r["file"], parse_mode=parse_mode)
             else:
-                bot.send_message(user.tel_id,message,parse_mode=parse_mode)
+                bot.send_message(user.tel_id, message, parse_mode=parse_mode)
 
             Messages(user=user, text=message, type=type).save()
-
 
         if r["type"] == "send_message":
             message = r["message"]

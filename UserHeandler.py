@@ -1,7 +1,8 @@
 from playhouse.shortcuts import model_to_dict
 from sanic import response
 from sanic.views import HTTPMethodView
-
+import logging
+logger = logging.getLogger("server")
 from models import Menu, db, Config, Messages, Users
 
 
@@ -10,10 +11,10 @@ class UserHeandler(HTTPMethodView):
     def get(self, request):
         args = request.args
         result={}
-        print(args)
+        logger.info(args)
         if "message_from_user" in args:
             u=Users.get_by_id(args["message_from_user"][0])
-            messages=Messages.select().where(Messages.user==u).order_by(Messages.id.desc()).execute()
+            messages=Messages.select().where(Messages.user==u).order_by(Messages.id.desc()).limit(100).execute()
             result=[]
             for m in messages:
                 result.append({

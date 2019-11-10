@@ -7,7 +7,7 @@ with open("upload.bat", 'rb') as f:
                       files={
                           "file": f
                       })
-    print(r.text)
+    logger.info(r.text)
 
 # with open("upload.bat", 'rb') as f:
 #     r = requests.post("https://catbox.moe/user/api.php", data={
@@ -16,5 +16,5 @@ with open("upload.bat", 'rb') as f:
 #                       files={
 #                           "fileToUpload": f
 #                       })
-#     print(r.text)
-    # print(r.json())
+#     logger.info(r.text)
+    # logger.info(r.json())

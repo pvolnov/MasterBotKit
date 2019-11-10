@@ -1,7 +1,8 @@
 from playhouse.shortcuts import model_to_dict
 from sanic import response
 from sanic.views import HTTPMethodView
-
+import logging
+logger = logging.getLogger("server")
 from models import Menu, db, Config
 
 
@@ -21,7 +22,7 @@ class ConfigHeandler(HTTPMethodView):
             c=Config.update({Config.value:r[conf]}).where(Config.name==conf).execute()
             if c==0:
                 Config.create(name=conf,value=r[conf])
-        print(r)
+        logger.info(r)
         return response.text("Update "+str(len(conf)))
 
     def patch(self, request):

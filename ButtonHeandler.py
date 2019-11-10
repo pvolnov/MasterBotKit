@@ -1,7 +1,8 @@
 from playhouse.shortcuts import model_to_dict
 from sanic import response
 from sanic.views import HTTPMethodView
-
+import logging
+logger = logging.getLogger("server")
 from models import Menu, Buttons, db
 
 
@@ -66,7 +67,7 @@ class ButtonHeandler(HTTPMethodView):
 
     def post(self, request):
         r = request.json
-        print(r)
+        logger.info(r)
         if "id" in r:
             del r["id"]
         btn = Buttons.get_or_none( (Buttons.name==r["name"]) & (Buttons.menu_id==r["menu_id"]))

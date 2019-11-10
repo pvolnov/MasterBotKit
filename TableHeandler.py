@@ -1,7 +1,8 @@
 from playhouse.shortcuts import model_to_dict
 from sanic import response
 from sanic.views import HTTPMethodView
-
+import logging
+logger = logging.getLogger("server")
 from models import Menu, Buttons, Tables, Rows
 
 
@@ -17,8 +18,8 @@ class TableHeandler(HTTPMethodView):
             all_rows=Rows.select(Rows.id,Rows.columns).where(Rows.table==t).execute()
             for row in all_rows:
                 res=[]
-                print("columns_names",columns_names)
-                print("row.columns",row.columns)
+                logger.info("columns_names",columns_names)
+                logger.info("row.columns",row.columns)
                 for c_name in columns_names:
                     if c_name in row.columns:
                         res.append(row.columns[c_name])

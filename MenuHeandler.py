@@ -1,7 +1,8 @@
 from playhouse.shortcuts import model_to_dict
 from sanic import response
 from sanic.views import HTTPMethodView
-
+import logging
+logger = logging.getLogger("server")
 from models import Menu, db
 
 
@@ -22,7 +23,7 @@ class MenuHeandler(HTTPMethodView):
 
     def post(self, request):
         r=request.json
-        print("add menu",r)
+        logger.info("add menu",r)
         try:
             m=Menu.insert(r).execute()
             return response.text({"id":m})
@@ -37,7 +38,7 @@ class MenuHeandler(HTTPMethodView):
         r=request.json
         if "btn_coord" in r:
             menu=Menu.get_by_id(r["menu_id"])
-            print('r["btn_coord"]',r["btn_coord"])
+            logger.info('r["btn_coord"]',r["btn_coord"])
             menu.buttons[r["btn_coord"]["y"]][r["btn_coord"]["x"]]=r["button_id"]
             menu.save()
             return response.json("ok")
@@ -46,16 +47,7 @@ class MenuHeandler(HTTPMethodView):
             Menu.update({Menu.zbutton: r["zbutton"],Menu.name:r["name"]}).where(Menu.id == r["id"]).execute()
             return response.json("ok")
 
-        print(r["buttons"])
-        new_buttons=[]
-        for row in r["buttons"]:
-            btn_row=[]
-            for b in row:
-                if b>0:
-                    btn_row.append(b)
-            new_buttons.append(btn_row)
-
-        Menu.update({Menu.buttons:new_buttons}).where(Menu.id==r["id"]).execute()
+        Menu.update({Menu.buttons:r["buttons"]}).where(Menu.id==r["id"]).execute()
         return response.text("ok")
 
     def delete(self, request):
