@@ -3,7 +3,7 @@ import axios from "axios";
 
 import {Button, Card, Container, Dimmer, Divider, Grid, Header, Icon, Image, Loader, Popup,} from 'semantic-ui-react'
 import BaseElement from "./BaseElement";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast} from "react-toastify";
 
 
@@ -44,7 +44,7 @@ export default class BotConstracter extends React.Component {
             }
         );
         main.loading(true);
-        axios.get(HOST_API + "buttons/",
+        axios.get(HOST + "buttons/",
             {
                 params: {
                     menu_id: this.state.menuID
@@ -69,7 +69,7 @@ export default class BotConstracter extends React.Component {
             }
             menu_buttons.push(brow);
         }
-        axios.patch(HOST_API + "menus/", {
+        axios.patch(HOST + "menus/", {
             buttons: menu_buttons,
             id: this.state.menuID
 

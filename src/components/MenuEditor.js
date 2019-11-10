@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Button, Dimmer, Dropdown, Form, Header, Input, Loader, Modal, Segment} from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast} from "react-toastify";
 
 
@@ -13,33 +13,30 @@ export default class MenuEditor extends React.Component {
         super(props);
 
         this.state = {
-            btnOptions: [
-                {key: '1', value: 'new', text: 'New', icon: 'add circle'},
-                {key: '2', value: '1', text: 'Главное меню',},
-                {key: '3', value: '22', text: 'Товар'}
-            ],
-            userTables: [
-                {key: '2', value: '1', text: 'Покупки',},
-                {key: '3', value: '22', text: 'Товар'}
-            ],
-            userTablesColumns: [
-                {key: '2', value: '1', text: 'Главное меню',},
-                {key: '3', value: '22', text: 'Товар'}
-            ],
-            groupsOptions: [
-                {key: '1', value: '1', text: 'Главное меню',},
-                {key: '2', value: '3', text: 'Магазин товаров'}
-            ],
+            btnOptions: [],
+            inlineBtnOptions: [],
+            userTables: [],
+            userTablesColumns: [],
+            groupsOptions: [],
+            inlineGroupsOptions: [],
+            name: "Menu",
+            template: "new",
+            textParsing: "None",
+            responseType: "all",
+            newButton: true,
+            menuID: props.menuID,
+            type: props.type,
+            buttonID: props.buttonID,
             typesOptions: [
+                {key: 0, value: 'all', text: 'All',},
                 {key: 1, value: 'text', text: 'Text',},
                 {key: 2, value: 'photo', text: 'Photo'},
                 {key: 3, value: 'video', text: 'Video'},
-                {key: 4, value: 'file', text: 'File'},
+                {key: 4, value: 'file', text: 'Document'},
+                {key: 5, value: 'audio', text: 'Audio'},
+                {key: 6, value: 'voice', text: 'Voice'},
             ],
-            textParsing: "None",
             activeItem: 'Menu',
-            name: "Menu",
-            menuID: props.menuID,
         };
         this.zbutton = {};
 
@@ -54,11 +51,55 @@ export default class MenuEditor extends React.Component {
 
     componentDidMount() {
         this.update();
+        var main = this;
+        axios.get(HOST + "tables/").then((resp) => {
+            var tables = resp.data;
+            var userTables = [];
+            var userTablesColumns = {};
+            for (let t in tables) {
+                userTables.push(
+                    {key: t, value: tables[t].id, text: tables[t].name}
+                );
+                userTablesColumns[tables[t].id] = [];
+                for (var c in tables[t].columns) {
+                    if (tables[t].columns[c].default == false)
+                        userTablesColumns[tables[t].id].push(
+                            {key: c, value: tables[t].columns[c].name, text: tables[t].columns[c].name}
+                        )
+                }
+                console.log("userTablesColumns", userTablesColumns)
+            }
+            main.setState({
+                userTables: userTables,
+                userTablesColumns: userTablesColumns
+            })
+        }).catch((e) => {
+            toast.error(JSON.stringify(e.response));
+        });
+        axios.get(HOST + "menus/").then((resp) => {
+            console.log("menus", resp.data);
+            var groupsOptions = [];
+            var inlineGroupsOptions = [];
+
+            for (var m in resp.data) {
+                if (resp.data[m].type > 0) {
+                    inlineGroupsOptions.push(
+                        {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                } else {
+                    groupsOptions.push(
+                        {key: m, value: resp.data[m].id, text: resp.data[m].name});
+                }
+            }
+            main.setState({
+                groupsOptions: groupsOptions,
+                inlineGroupsOptions: inlineGroupsOptions,
+            })
+        });
     }
 
     update = () => {
         var main = this;
-        axios.get(HOST_API + "menus/",
+        axios.get(HOST + "menus/",
             {
                 params: {
                     menu_id: this.state.menuID
@@ -103,7 +144,7 @@ export default class MenuEditor extends React.Component {
         let formData = new FormData();
         formData.append('file', this.state.file);
 
-        axios.post(HOST_API + "upload/", formData
+        axios.post(HOST + "upload/", formData
             , {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -117,7 +158,7 @@ export default class MenuEditor extends React.Component {
     };
 
     drop = () => {
-        axios.delete(HOST_API + "buttons/",
+        axios.delete(HOST + "buttons/",
             {
                 params: {
                     button_id: this.state.buttonID
@@ -157,7 +198,7 @@ export default class MenuEditor extends React.Component {
 
     save = () => {
         console.log("SAVE");
-        axios.patch(HOST_API + "menus/", {
+        axios.patch(HOST + "menus/", {
             zbutton: this.zbutton,
             name: this.state.name,
             id: this.state.menuID
@@ -168,12 +209,11 @@ export default class MenuEditor extends React.Component {
 
     render() {
         const {
-            typesOptions, btnOptions, groupsOptions, userTablesColumns, addition,changeGroup,
-            textParsing, createNew, userTables, notification, saveInTable, funkParamsEnable
+            typesOptions, groupsOptions, userTablesColumns, addition,changeGroup,
+            textParsing, inlineGroupsOptions, userTables, notification, saveInTable, funkParamsEnable
         } = this.state;
 
-        let newButton = (this.state.template == "new");
-        let useFunk = this.state.funkParams != null && this.state.funkParams != "";
+        let notResponse = this.state.autoResponse;
 
         return (
             <Segment attached='bottom'>
@@ -227,6 +267,17 @@ export default class MenuEditor extends React.Component {
                             </Modal.Content>
                         </Modal>
                         <Form>
+                            <Form.Field required>
+                                <label>Тип данных в ответе пользователя</label>
+                                <Form.Select
+                                    width={16}
+                                    fluid
+                                    name={"responseType"}
+                                    value={this.state.responseType}
+                                    options={typesOptions}
+                                    onChange={this.select}
+                                />
+                            </Form.Field>
                             <Form.Group>
                                 <Form.Radio fluid name={'levelPermit'} onChange={this.change} label='Only for level'
                                             toggle checked={this.state.levelPermit} width={12}/>
@@ -242,6 +293,7 @@ export default class MenuEditor extends React.Component {
                                     onChange={this.input}
                                 />
                             </Form.Group>
+
                             <Form.Group>
                                 <Form.Radio fluid name={'changePermit'} onChange={this.change} label='Change user level'
                                             toggle checked={this.state.changePermit} width={12}/>
@@ -318,28 +370,28 @@ export default class MenuEditor extends React.Component {
                                     onChange={this.select}
                                 />
                             </Form.Group>
-                            <Form.TextArea disabled={useFunk} label='Response'
+                            <Form.TextArea disabled={notResponse} label='Response'
                                            name={"response"}
                                            value={this.state.response}
                                            onChange={this.input}
                                            placeholder='С вами скоро свяжется оператор'/>
                             <Form.Group inline widths={"4"}>
                                 <label>Parse Mode:</label>
-                                <Form.Radio disabled={useFunk}
+                                <Form.Radio disabled={notResponse}
                                             name={"textParsing"}
                                             label='None'
                                             value='None'
                                             checked={textParsing === 'None'}
                                             onChange={this.select}
                                 />
-                                <Form.Radio disabled={useFunk}
+                                <Form.Radio disabled={notResponse}
                                             name={"textParsing"}
                                             label='Markdown'
                                             value='markdown'
                                             checked={textParsing === 'markdown'}
                                             onChange={this.select}
                                 />
-                                <Form.Radio disabled={useFunk}
+                                <Form.Radio disabled={notResponse}
                                             name={"textParsing"}
                                             label='HTML'
                                             value='HTML'
@@ -355,19 +407,31 @@ export default class MenuEditor extends React.Component {
                                                 return (<Button name={"addition"} active secondary
                                                                 value={""} icon={label} onClick={this.input}/>)
                                             } else
-                                                return (<Button name={"addition"} disabled={useFunk}
+                                                return (<Button name={"addition"} disabled={notResponse}
                                                                 value={label} icon={label} onClick={this.setAddition}/>)
                                         })
                                     }
                                 </Button.Group>
                             </Form.Group>
-
+                            <Form.Group widths='equal'>
+                                <Form.Radio fluid name={'add_callback_menu'} onChange={this.change} label='Add Callback'
+                                            toggle checked={this.state.add_callback_menu} width={8} disabled={changeGroup||notResponse}/>
+                                <Form.Select
+                                    fluid search
+                                    name={"callback_menu"}
+                                    disabled={!this.state.add_callback_menu || changeGroup||notResponse}
+                                    label='Template'
+                                    options={inlineGroupsOptions}
+                                    value={this.state.callback_menu}
+                                    onChange={this.select}
+                                />
+                            </Form.Group>
                             <Form.Checkbox label='Не отвечать'
                                            checked={this.state.autoResponse}
                                            onChange={this.change} name={"autoResponse"}/>
 
-                            <Form.Input name={"funkParams"} onChange={this.input} value={this.state.funkParams}
-                                        placeholder='-f start menu' label={"Answer from function"}/>
+                            <Form.Input name={"callFunc"} onChange={this.input} value={this.state.callFunc}
+                                        placeholder='new' label={"Call func"}/>
 
                         </Form>
                     </Segment>

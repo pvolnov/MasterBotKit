@@ -4,7 +4,9 @@
 .container{
   border-radius: 20px;
 }
-
+body{
+  background-color: aliceblue;
+}
 .baseelem{
   height: 100%;
   width: 100px;

@@ -1,7 +1,7 @@
 import React from 'react'
 import {Button, Form, Grid, Header, Image, Message, Segment} from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast, ToastContainer} from "react-toastify";
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
@@ -17,10 +17,10 @@ export default class LoginForm extends React.Component {
     };
 
     auth=()=>{
-        console.log("3333");
-        axios.get(HOST_API + "api/",{
+        axios.get(HOST + "api/",{
             params:{
-                password:this.state.password
+                password:this.state.password,
+                login:this.state.login,
             },
         })
             .then((resp) => {
@@ -28,6 +28,7 @@ export default class LoginForm extends React.Component {
                 if(resp.data!="error"){
                     cookies.set("session",resp.data);
                     cookies.set("auth",true);
+                    toast.error("Success");
                     window.location.reload();
                 }
                 else {

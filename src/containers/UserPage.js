@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Container, Dimmer, Loader, Menu, Table} from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import UserTable from "../components/UserTable";
 import {toast, ToastContainer} from "react-toastify";
 import MessagesMenu from "../components/MessagesMenu";
@@ -27,7 +27,7 @@ export default class UserPage extends React.Component {
     componentDidMount() {
         var main = this;
         main.loading(true);
-        axios.get(HOST_API + "tables/")
+        axios.get(HOST + "tables/")
             .then((resp) => {
                 main.setState({tables: resp.data});
                 main.loading(false);
@@ -52,7 +52,7 @@ export default class UserPage extends React.Component {
                 activeItem: name,
                 messages:false
             });
-        axios.get(HOST_API + "tables/", {
+        axios.get(HOST + "tables/", {
             params: {
                 table_id: id
             }

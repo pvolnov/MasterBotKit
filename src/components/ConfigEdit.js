@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Button, Form, Header, Icon, Item, Segment} from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast} from "react-toastify";
 
 
@@ -48,7 +48,7 @@ export default class ConfigEdit extends React.Component {
 
     componentDidMount() {
         var main = this;
-        axios.get(HOST_API + "config/")
+        axios.get(HOST + "config/")
             .then((resp) => {
                 console.log(resp.data);
                 main.setState({...resp.data})
@@ -62,7 +62,7 @@ export default class ConfigEdit extends React.Component {
             toast.error("Passwords must be similar");
             return;
         }
-        axios.post(HOST_API + "config/", this.state)
+        axios.post(HOST + "config/", this.state)
             .then((resp) => {
                 console.log(resp);
                 toast.success(resp.data);
@@ -82,7 +82,7 @@ export default class ConfigEdit extends React.Component {
         this.setState({
             server: k
         });
-        axios.post(HOST_API + "config/", {name: "server", "value": this.servers[k].key})
+        axios.post(HOST + "config/", {name: "server", "value": this.servers[k].key})
             .then((resp) => {
                 toast.success("Complete");
             }).catch((e) => {
@@ -91,7 +91,7 @@ export default class ConfigEdit extends React.Component {
     };
 
     uploadFile=()=>{
-        axios.post(HOST_API + "upload_file/", this.state.file, {
+        axios.post(HOST + "upload_file/", this.state.file, {
             headers: {
                 'Content-Type': this.state.file.type
             }

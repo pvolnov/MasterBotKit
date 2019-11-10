@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Button, Dimmer, Dropdown, Form, Input, Loader, Modal, Segment} from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast} from "react-toastify";
 
 
@@ -19,7 +19,7 @@ export default class ButtonEdit extends React.Component {
             userTablesColumns: [],
             groupsOptions: [],
             inlineGroupsOptions: [],
-            name: "Menu",
+            name: "new button",
             template: "new",
             textParsing: "None",
             newButton: true,
@@ -39,7 +39,7 @@ export default class ButtonEdit extends React.Component {
 
     componentDidMount() {
         var main = this;
-        axios.get(HOST_API + "tables/").then((resp) => {
+        axios.get(HOST + "tables/").then((resp) => {
             var tables = resp.data;
             var userTables = [];
             var userTablesColumns = {};
@@ -63,7 +63,7 @@ export default class ButtonEdit extends React.Component {
         }).catch((e) => {
             toast.error(JSON.stringify(e.response));
         });
-        axios.get(HOST_API + "menus/").then((resp) => {
+        axios.get(HOST + "menus/").then((resp) => {
             console.log("menus", resp.data);
             var groupsOptions = [];
             var inlineGroupsOptions = [];
@@ -83,7 +83,7 @@ export default class ButtonEdit extends React.Component {
             })
         });
 
-        axios.get(HOST_API + "buttons/", {params: {all: true}}).then((resp) => {
+        axios.get(HOST + "buttons/", {params: {all: true}}).then((resp) => {
             console.log("menus", resp.data);
             var btnOptions = [];
             var inlineBtnOptions = [];
@@ -108,7 +108,7 @@ export default class ButtonEdit extends React.Component {
 
         if (this.state.buttonID > 0) {
             this.loading(true);
-            axios.get(HOST_API + "buttons/", {
+            axios.get(HOST + "buttons/", {
                 params: {
                     btn_id: this.state.buttonID
                 }
@@ -137,7 +137,7 @@ export default class ButtonEdit extends React.Component {
         var main = this;
         if (value !== "new") {
             this.loading(true);
-            axios.get(HOST_API + "buttons/", {
+            axios.get(HOST + "buttons/", {
                 params: {
                     btn_id: value
                 }
@@ -180,7 +180,7 @@ export default class ButtonEdit extends React.Component {
         let formData = new FormData();
         formData.append('file', this.state.file);
 
-        axios.post(HOST_API + "upload/", formData
+        axios.post(HOST + "upload/", formData
             , {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -218,8 +218,8 @@ export default class ButtonEdit extends React.Component {
         delete btn.loading;
         delete btn.template;
 
-        if (newButton) {
-            axios.post(HOST_API + "buttons/",
+        if (newButton || btn.id===0) {
+            axios.post(HOST + "buttons/",
                 {
                     id: this.state.buttonID,
                     info: btn,
@@ -230,7 +230,7 @@ export default class ButtonEdit extends React.Component {
                 main.setState({
                     buttonID: resp.data.id
                 });
-                axios.patch(HOST_API + "menus/",
+                axios.patch(HOST + "menus/",
                     {
                         menu_id: main.state.menuID,
                         btn_coord: btn_coord,
@@ -245,13 +245,13 @@ export default class ButtonEdit extends React.Component {
                 toast.error(JSON.stringify(e.response));
             })
         } else {
-            axios.patch(HOST_API + "buttons/",
+            axios.patch(HOST + "buttons/",
                 {
                     id: this.state.buttonID,
                     info: btn,
                     name: btn.name,
                 }).then((resp) => {
-                axios.patch(HOST_API + "menus/",
+                axios.patch(HOST + "menus/",
                     {
                         menu_id: main.state.menuID,
                         btn_coord: btn_coord,
@@ -271,7 +271,7 @@ export default class ButtonEdit extends React.Component {
     };
 
     drop = () => {
-        axios.delete(HOST_API + "buttons/",
+        axios.delete(HOST + "buttons/",
             {
                 params: {
                     button_id: this.state.buttonID
@@ -295,7 +295,7 @@ export default class ButtonEdit extends React.Component {
             textParsing, userTables, notification, saveInTable, newButton, changeGroup, inlineGroupsOptions
         } = this.state;
 
-        let useFunk = this.state.funkParams != null && this.state.funkParams != "";
+        let notResponse = this.state.autoResponse;
         let callback = this.state.type > 0;
         // console.log(this.state);
 
@@ -327,7 +327,7 @@ export default class ButtonEdit extends React.Component {
                     <Form.Group widths='equal'>
                         <Form.Input fluid label='Label' value={this.state.name}
                                     name={"name"} onChange={this.input}
-                                    disabled={!newButton} placeholder='Menu'/>
+                                     placeholder='Menu'/>
                         <Form.Select
                             fluid
                             name={"template"}
@@ -439,28 +439,28 @@ export default class ButtonEdit extends React.Component {
                             onChange={this.select}
                         />
                     </Form.Group>
-                    <Form.TextArea disabled={useFunk} label='Response'
+                    <Form.TextArea disabled={notResponse} label='Response'
                                    name={"response"}
                                    value={this.state.response}
                                    onChange={this.input}
                                    placeholder='С вами скоро свяжется оператор'/>
                     <Form.Group inline widths={"4"}>
                         <label>Parse Mode:</label>
-                        <Form.Radio disabled={useFunk}
+                        <Form.Radio disabled={notResponse}
                                     name={"textParsing"}
                                     label='None'
                                     value='None'
                                     checked={textParsing === 'None'}
                                     onChange={this.select}
                         />
-                        <Form.Radio disabled={useFunk}
+                        <Form.Radio disabled={notResponse}
                                     name={"textParsing"}
                                     label='Markdown'
                                     value='markdown'
                                     checked={textParsing === 'markdown'}
                                     onChange={this.select}
                         />
-                        <Form.Radio disabled={useFunk}
+                        <Form.Radio disabled={notResponse}
                                     name={"textParsing"}
                                     label='HTML'
                                     value='HTML'
@@ -476,7 +476,7 @@ export default class ButtonEdit extends React.Component {
                                         return (<Button name={"addition"} active secondary
                                                         value={""} icon={label} onClick={this.input}/>)
                                     } else
-                                        return (<Button name={"addition"} disabled={useFunk}
+                                        return (<Button name={"addition"} disabled={notResponse}
                                                         value={label} icon={label} onClick={this.setAddition}/>)
                                 })
                             }
@@ -484,11 +484,11 @@ export default class ButtonEdit extends React.Component {
                     </Form.Group>
                     <Form.Group widths='equal'>
                         <Form.Radio fluid name={'add_callback_menu'} onChange={this.change} label='Add Callback'
-                                    toggle checked={this.state.add_callback_menu} width={8} disabled={changeGroup}/>
+                                    toggle checked={this.state.add_callback_menu} width={8} disabled={changeGroup||notResponse}/>
                         <Form.Select
                             fluid search
                             name={"callback_menu"}
-                            disabled={!this.state.add_callback_menu || changeGroup}
+                            disabled={!this.state.add_callback_menu || changeGroup||notResponse}
                             label='Template'
                             options={inlineGroupsOptions}
                             value={this.state.callback_menu}
@@ -503,8 +503,12 @@ export default class ButtonEdit extends React.Component {
                                    checked={this.state.autoResponse}
                                    onChange={this.change} name={"autoResponse"}/>
 
-                    <Form.Input name={"funkParams"} onChange={this.input} value={this.state.funkParams}
-                                placeholder='-f start menu' label={"Answer from function"}/>
+                    <Form.Checkbox label='Глобальная кнопка (доступна из всех меню)'
+                                   checked={this.state.globalButton}
+                                   onChange={this.change} name={"globalButton"}/>
+
+                    <Form.Input name={"callFunc"} onChange={this.input} value={this.state.callFunc}
+                                placeholder='new' label={"Call func"}/>
 
                     {/*<Form.Checkbox label='Создать новый элемент с этими параметрами'*/}
                     {/*disabled={newButton} checked={createNew}*/}

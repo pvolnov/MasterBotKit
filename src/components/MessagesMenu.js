@@ -15,7 +15,7 @@ import {
     TextArea
 } from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast} from "react-toastify";
 import IconMBK from "../img/telegram.png"
 import Grid from "semantic-ui-react/dist/commonjs/collections/Grid";
@@ -38,7 +38,7 @@ export default class MessagesMenu extends React.Component {
     componentDidMount() {
         var main = this;
         main.loading(true);
-        axios.get(HOST_API + "users/", {
+        axios.get(HOST + "users/", {
             params: {
                 all_user: true
             }
@@ -90,7 +90,7 @@ export default class MessagesMenu extends React.Component {
         let formData = new FormData();
         formData.append('file', this.state.file);
 
-        axios.post(HOST_API + "upload/", formData
+        axios.post(HOST + "upload/", formData
             , {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -116,7 +116,7 @@ export default class MessagesMenu extends React.Component {
     changeUser = () => {
         var main = this;
         main.loading(true);
-        axios.get(HOST_API + "users/", {
+        axios.get(HOST + "users/", {
             params: {
                 message_from_user: this.state.user_id
             }
@@ -134,7 +134,7 @@ export default class MessagesMenu extends React.Component {
 
 
     distribution = () => {
-        axios.post(HOST_API + "api/", {
+        axios.post(HOST + "api/", {
             type: "send_message_to_user",
             user_id: this.state.user_id,
             message: this.state.response,

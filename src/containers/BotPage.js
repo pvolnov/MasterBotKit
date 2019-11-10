@@ -5,7 +5,7 @@ import {toast} from 'react-toastify';
 import BotConstracter from "../components/BotConstracter";
 import EditorBlock from "../components/EditorBlock";
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 
 
 export default class BotPage extends React.Component {
@@ -50,7 +50,7 @@ export default class BotPage extends React.Component {
 
     update = () => {
         var main = this;
-        axios.get(HOST_API + "menus/").then((resp) => {
+        axios.get(HOST + "menus/").then((resp) => {
             var options = [];
             for (var m in resp.data) {
                 var menu = resp.data[m];
@@ -67,8 +67,7 @@ export default class BotPage extends React.Component {
             main.setState({
                 options: options
             });
-            console.log("options complete", options)
-
+            console.log("options complete", options);
             if (main.state.menuID < 1)
                 main.changeMenu({}, {value: options[0].value});
             main.forceUpdate()
@@ -89,7 +88,9 @@ export default class BotPage extends React.Component {
 
     openBtn = (btn, row, col) => {
         var btn_coord = {x: col, y: row};
-        console.log(btn_coord);
+        if(!btn.id){
+            btn.id=0;
+        }
         this.setState({activeBtn: -1});
         setTimeout(() => this.setState({
             activeBtn: btn.id,
@@ -100,7 +101,7 @@ export default class BotPage extends React.Component {
 
     createMenu = (e, data) => {
         var main = this;
-        axios.post(HOST_API + "menus/", {
+        axios.post(HOST + "menus/", {
             "name": "No name " + main.state.options.length.toString(),
             "type": data.value,
             "buttons": [],
@@ -135,7 +136,7 @@ export default class BotPage extends React.Component {
                 main.forceUpdate();
                 toast.success("Complete");
             }).catch((e) => {
-            toast.error(JSON.stringify(e.response.data));
+            toast.error(e.response);
         });
 
     };
@@ -161,7 +162,7 @@ export default class BotPage extends React.Component {
 
     dropMenu = (e, data) => {
         var main = this;
-        axios.delete(HOST_API + "menus/",
+        axios.delete(HOST + "menus/",
             {
                 params: {
                     menu_id: this.state.menuID
@@ -173,7 +174,7 @@ export default class BotPage extends React.Component {
                 // this.openBtn(1);
                 toast.success("Drop table");
             }).catch((e) => {
-            toast.error(JSON.stringify(e.response.data));
+            toast.error(e.response)
         });
 
     };

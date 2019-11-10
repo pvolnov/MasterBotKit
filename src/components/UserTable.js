@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Button, Checkbox, Dimmer, Form, Icon, Input, Loader, Modal, Table, TextArea} from 'semantic-ui-react'
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast} from "react-toastify";
 
 
@@ -40,7 +40,7 @@ export default class UserTable extends React.Component {
     };
 
     distribution = () => {
-        axios.post(HOST_API + "api/", {
+        axios.post(HOST + "api/", {
             type:"send_message",
             chats: this.rows_ids,
             message: this.state.message
@@ -49,7 +49,7 @@ export default class UserTable extends React.Component {
     };
 
     save = () => {
-        axios.patch(HOST_API + "tables/", {
+        axios.patch(HOST + "tables/", {
             patch_table_data: this.patch_table_data
         }).then((r) => {
             console.log("SUC");
@@ -59,7 +59,7 @@ export default class UserTable extends React.Component {
     };
 
     dropRows = () => {
-        axios.delete(HOST_API + "tables/", {
+        axios.delete(HOST + "tables/", {
         params:{
             rows:this.rows_ids,
         }

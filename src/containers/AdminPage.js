@@ -17,7 +17,7 @@ import {
 import ConfigEdit from "../components/ConfigEdit";
 import {ScrollMenu} from "react-horizontal-scrolling-menu";
 import axios from "axios";
-import {HOST_API} from "../constants/config";
+import {HOST} from "../constants/config";
 import {toast, ToastContainer} from "react-toastify";
 
 
@@ -50,7 +50,7 @@ export default class AdminPage extends React.Component {
     componentDidMount() {
         var main = this;
         main.loading(true);
-        axios.get(HOST_API + "tables/")
+        axios.get(HOST + "tables/")
             .then((resp) => {
                 main.loading(false);
                 main.setState({tables: resp.data})
@@ -110,7 +110,7 @@ export default class AdminPage extends React.Component {
     };
 
     saveTable = (index) => {
-        axios.patch(HOST_API + "tables/",
+        axios.patch(HOST + "tables/",
             {
                 ...this.state.tables[index],
             }).then((resp) => {
@@ -125,7 +125,7 @@ export default class AdminPage extends React.Component {
     addTable = () => {
         var main = this;
         console.log(this.state.addTableName);
-        axios.post(HOST_API + "tables/",
+        axios.post(HOST + "tables/",
             {
                 name: this.state.addTableName,
                 columns: []
@@ -144,7 +144,7 @@ export default class AdminPage extends React.Component {
     drop = (index) => {
         var tindex = this.state.tables[index].id;
         var main = this;
-        axios.delete(HOST_API + "tables/" ,{
+        axios.delete(HOST + "tables/" ,{
             params:{
                 table_id:tindex
             }
