@@ -2,5 +2,8 @@ import datetime
 import urllib
 
 import requests
+from peewee import fn
 
-file = urllib.request.urlopen("https://files.catbox.moe/szj3xm").read()
+from jv_models import Stack
+
+print(fn.MIN(Stack.in_queue))

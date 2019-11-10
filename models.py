@@ -12,7 +12,7 @@ class Users(Model):
     name = TextField(null=True)
     username = TextField(null=True)
     avatar=TextField(null=True)
-    cms = IntegerField(default=0)
+    cms = IntegerField(default=1)
     level = IntegerField(default=0)
 
     class Meta:
@@ -102,6 +102,7 @@ class Messages(Model):
     info=JSONField(null=True)
     date=TextField(null=True)
     user = ForeignKeyField(Users,'id',lazy_load=False)
+    message_id=IntegerField(default=0)
 
     class Meta:
         database = db
